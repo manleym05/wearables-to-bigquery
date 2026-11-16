@@ -1,0 +1,18 @@
+name = "cornerstone-maps"
+main = "src/index.ts"
+compatibility_date = "2026-05-21"
+account_id = "YOUR_CLOUDFLARE_ACCOUNT_ID"
+
+# No cron — Maps is on-demand only. Worker only handles fetch().
+# No KV — using BQ as the cache substrate.
+
+[vars]
+GCP_PROJECT  = "your-gcp-project"
+BQ_DATASET   = "life_ops"
+SUBJECT_ID   = "1"
+TIMEZONE     = "America/New_York"
+CACHE_TTL_DAYS = "30"
+# secrets (set via `wrangler secret put`):
+#   MAPS_API_KEY      Google Maps Platform key, restricted to Directions API
+#   GCP_SA_KEY        cornerstone-maps-worker SA JSON
+#   ADMIN_TOKEN       shared secret for /directions route

@@ -1,0 +1,100 @@
+# Cornerstone — Hevy exercise mapping
+#
+# Maps gameplan exercise names (as used in your own training plan)
+# to Hevy `exercise_template_id`s. Read by `workers/hevy-push` at routine build time.
+#
+# IDs come from `life_ops.raw_hevy_exercise_template` (Hevy's stock catalog, 433 rows,
+# ingested by `workers/hevy`). Re-seed with the query at the bottom of this file if
+# Hevy adds new stock exercises.
+#
+# Conventions:
+#   * Match the EXACT gameplan name (case-sensitive). The Worker also does case-insensitive
+#     fallback and a small alias table (`aliases:` below).
+#   * If a gameplan name is a COMPOUND ("Plank + Pallof Press"), list both Hevy IDs under
+#     `compound:`. The Worker unpacks into two consecutive Hevy exercises with the same
+#     set/rep prescription.
+#   * Unknown names: the Worker FAILS LOUDLY (HTTP 422 + audit row with status="validation_failed").
+#     Better friction than a wrong routine.
+#
+# Last seeded: 2026-05-26 against raw_hevy_exercise_template (433 stock + custom).
+
+# ── Day 1: Upper (Hypertrophy) ────────────────────────────────────────────────
+exercises:
+  "Incline DB Press":            "07B38369"   # Incline Bench Press (Dumbbell)
+  "Pull-up":                     "1B2B1E7C"   # Pull Up
+  "Pull-up (weighted)":          "729237D1"   # Pull Up (Weighted)
+  "Seated DB Shoulder Press":    "9930DF71"   # Seated Overhead Press (Dumbbell)
+  "Chest-supported Row":         "914F3A96"   # Chest Supported Incline Row (Dumbbell)
+  "Lateral Raise":               "422B08F1"   # Lateral Raise (Dumbbell)
+  "EZ-bar Curl":                 "01A35BF9"   # EZ Bar Biceps Curl
+  "Tricep Pushdown":             "93A552C6"   # Triceps Pushdown
+
+  # ── Day 2: Lower (Strength bias) ─────────────────────────────────────────────
+  "Front Squat":                 "5046D0A9"   # Front Squat (barbell)
+  "Romanian Deadlift":           "2B4B7310"   # Romanian Deadlift (Barbell)
+  "Bulgarian Split Squat":       "B5D3A742"   # Bulgarian Split Squat (dumbbell)
+  "Leg Curl":                    "B8127AD1"   # Lying Leg Curl (Machine)
+  "Standing Calf Raise":         "06745E58"   # Standing Calf Raise (bodyweight)
+  "Plank":                       "C6C9B8A0"
+  "Pallof Press":                "CC55119B"   # Cable Core Pallof Press
+
+  # ── Day 3: Push ──────────────────────────────────────────────────────────────
+  "Flat Barbell Bench":          "79D0BB3A"   # Bench Press (Barbell)
+  "Incline DB Fly":              "D3E2AB55"   # Incline Chest Fly (Dumbbell)
+  "Cable Lateral Raise":         "BE289E45"   # Lateral Raise (Cable)
+  "Overhead Tricep Extension":   "B5EFBF9C"   # Overhead Triceps Extension (Cable)
+  "Tricep Rope Pushdown":        "94B7239B"   # Triceps Rope Pushdown
+
+  # ── Day 4: Pull ──────────────────────────────────────────────────────────────
+  "Conventional Deadlift":       "C6272009"   # Deadlift (Barbell)
+  "Barbell Row":                 "55E6546F"   # Bent Over Row (Barbell)
+  "Single-Arm Cable Row":        "D0C4A899"   # Single Arm Cable Row
+  "Rear Delt Fly":               "E5988A0A"   # Rear Delt Reverse Fly (Dumbbell)
+  "Hammer Curl":                 "7E3BC8B6"   # Hammer Curl (Dumbbell)
+  "Face Pull":                   "BE640BA0"
+
+  # ── Day 5: Legs (Hypertrophy) ────────────────────────────────────────────────
+  "Back Squat":                  "D04AC939"   # Squat (Barbell)
+  "Hack Squat":                  "1E42FD5F"   # Hack Squat (Machine)
+  "Hip Thrust":                  "D57C2EC7"   # Hip Thrust (Barbell)
+  "Walking Lunge":               "A733CC5B"   # Walking Lunge (Dumbbell)
+  "Leg Extension":               "75A4F6C4"   # Leg Extension (Machine)
+  "Seated Leg Curl":             "11A123F3"   # Seated Leg Curl (Machine)
+  "Seated Calf Raise":           "062AB91A"
+
+  # ── Day 6: Full Body (light) ─────────────────────────────────────────────────
+  "Trap Bar Deadlift":           "B923B230"   # Deadlift (Trap bar)
+  "Goblet Squat":                "3D0C7C75"   # Goblet Squat (dumbbell)
+  "DB Bench Press":              "3601968B"   # Bench Press (Dumbbell)
+  "One-Arm DB Row":              "F1E57334"   # Dumbbell Row
+  "DB Overhead Press":           "6AC96645"   # Overhead Press (Dumbbell)
+  "Side Plank":                  "E3EDA509"
+
+# Compound prescriptions — one gameplan line that should expand into N Hevy exercises.
+compound:
+  "Plank + Pallof Press":
+    - "Plank"
+    - "Pallof Press"
+  "Plank + Side Plank":
+    - "Plank"
+    - "Side Plank"
+
+# Aliases — alternate names the agent might send. Resolved before lookup.
+aliases:
+  "RDL":                          "Romanian Deadlift"
+  "DB Row":                       "One-Arm DB Row"
+  "DB Press":                     "DB Overhead Press"
+  "DB Shoulder Press":            "Seated DB Shoulder Press"
+  "Goblet Squat (DB)":            "Goblet Squat"
+  "Bench Press":                  "Flat Barbell Bench"
+  "Barbell Bench":                "Flat Barbell Bench"
+  "Pull-up (weighted if BW <8 RPE)": "Pull-up"
+  "Back Squat OR Hack Squat":     "Back Squat"
+  "Trap Bar Deadlift OR Goblet Squat": "Trap Bar Deadlift"
+
+# Re-seed query (run when Hevy adds new stock exercises to your catalog):
+#
+#   SELECT exercise_template_id, title, primary_muscle_group, equipment
+#   FROM `your-gcp-project.life_ops.raw_hevy_exercise_template`
+#   WHERE subject_id = 1
+#   ORDER BY title;

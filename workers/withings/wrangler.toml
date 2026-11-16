@@ -1,0 +1,24 @@
+name = "cornerstone-withings"
+main = "src/index.ts"
+compatibility_date = "2026-05-20"
+account_id = "YOUR_CLOUDFLARE_ACCOUNT_ID"
+
+[triggers]
+crons = ["*/30 * * * *"]
+
+[[kv_namespaces]]
+binding = "WITHINGS_STATE"
+id = "YOUR_KV_NAMESPACE_ID"
+
+[vars]
+GCP_PROJECT     = "your-gcp-project"
+BQ_DATASET      = "life_ops"
+SUBJECT_ID      = "1"
+TIMEZONE        = "America/New_York"
+WITHINGS_SCOPE  = "user.metrics,user.activity,user.info"
+# secrets (set via `wrangler secret put`, NOT here):
+#   WITHINGS_CLIENT_ID
+#   WITHINGS_CLIENT_SECRET
+#   WITHINGS_REDIRECT_URI
+#   GCP_SA_KEY        (cornerstone-withings-worker SA JSON)
+#   ADMIN_TOKEN       (shared secret for /backfill + /oauth/start)

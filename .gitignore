@@ -1,0 +1,11 @@
+node_modules/
+dist/
+dist-debug/
+.wrangler/
+.dev.vars
+*.log
+.DS_Store
+# never commit service-account keys or vendor tokens
+*sa-key*.json
+*service-account*.json
+.env

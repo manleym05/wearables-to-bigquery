@@ -1,0 +1,26 @@
+name = "cornerstone-strava"
+main = "src/index.ts"
+compatibility_date = "2026-05-20"
+account_id = "YOUR_CLOUDFLARE_ACCOUNT_ID"
+
+# [triggers] — RETIRED 2026-06-03. Strava ingestion decommissioned: run/walk tracking consolidated
+# to Oura (raw_oura_workout + raw_oura_heartrate cover activity type / HR / strain / Z2), and Strava's
+# June-2026 API policy adds a paid-sub requirement + restricts AI/persistent-storage use. The worker
+# code is kept for a possible future revisit; the cron is emptied so it never fires (no API calls).
+[triggers]
+crons = []
+
+[[kv_namespaces]]
+binding = "STRAVA_STATE"
+id = "YOUR_KV_NAMESPACE_ID"
+
+[vars]
+GCP_PROJECT  = "your-gcp-project"
+BQ_DATASET   = "life_ops"
+SUBJECT_ID   = "1"
+TIMEZONE     = "America/New_York"
+STRAVA_SCOPE = "read,activity:read_all,profile:read_all"
+# secrets (set via `wrangler secret put`):
+#   STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, STRAVA_REDIRECT_URI
+#   GCP_SA_KEY        (cornerstone-strava-worker SA JSON)
+#   ADMIN_TOKEN

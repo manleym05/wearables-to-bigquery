@@ -1,0 +1,32 @@
+name = "cornerstone-oura"
+main = "src/index.ts"
+compatibility_date = "2026-05-20"
+account_id = "YOUR_CLOUDFLARE_ACCOUNT_ID"
+
+[triggers]
+# crons[0] = 14-endpoint summary poll (every 30 min). crons[1] = intraday HR incremental (daily ~06:17 ET).
+# MUST stay in sync with SUMMARY_CRON / HR_CRON in src/index.ts — scheduled() branches on event.cron.
+crons = ["*/30 * * * *", "17 10 * * *"]
+
+[[kv_namespaces]]
+binding = "OURA_STATE"
+id = "YOUR_KV_NAMESPACE_ID"
+
+[vars]
+GCP_PROJECT = "your-gcp-project"
+BQ_DATASET  = "life_ops"
+SUBJECT_ID  = "1"
+TIMEZONE    = "America/New_York"
+# Oura OAuth scopes (space-separated). Covers all 16 endpoints the worker pulls — the app
+# registration (developer.ouraring.com, "Cornerstone") has all 11 checked; keep in sync.
+# ⚠️ SpO2 scope naming is inconsistent across Oura's surfaces (docs say `spo2`, OpenAPI catalog
+# says `spo2Daily`, the /daily_spo2 401 names `spo2`) — request BOTH; authorize silently drops
+# whichever it doesn't recognize, so the union is safe.
+OURA_SCOPE  = "email personal daily heartrate workout tag session spo2 spo2Daily ring_configuration stress heart_health"
+# secrets (set via `wrangler secret put`, NOT here):
+#   OURA_CLIENT_ID      (Oura developer-portal app)
+#   OURA_CLIENT_SECRET
+#   OURA_REDIRECT_URI   (https://<worker>.workers.dev/oauth/callback — must match the app registration EXACTLY)
+#   GCP_SA_KEY          (full JSON of the service account key)
+#   BACKFILL_TOKEN      (shared secret for /backfill + /oauth/start HTTP routes)
+#   OURA_PAT            (DEPRECATED fallback — delete after the OAuth grant is verified; see docs/oura-oauth-migration.md)

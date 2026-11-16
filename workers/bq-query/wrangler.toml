@@ -1,0 +1,19 @@
+name = "cornerstone-bq-query"
+main = "src/index.ts"
+compatibility_date = "2026-05-21"
+account_id = "YOUR_CLOUDFLARE_ACCOUNT_ID"
+
+# No cron — on-demand only. Worker only handles fetch().
+# No KV — stateless; BQ free tier makes per-call queries effectively free, so no cache layer.
+
+[vars]
+GCP_PROJECT       = "your-gcp-project"
+BQ_DATASET        = "life_ops"
+SUBJECT_ID        = "1"
+TIMEZONE          = "America/New_York"
+# Cap on bytes a single passthrough/named query may bill (cost guardrail). 1 GiB default.
+MAX_BYTES_BILLED  = "1073741824"
+# secrets (set via `wrangler secret put`):
+#   GCP_SA_KEY    read-only query SA JSON (cornerstone-bq-reader@: roles/bigquery.dataViewer on
+#                 dataset life_ops + roles/bigquery.jobUser on the project — see README).
+#   QUERY_TOKEN   shared bearer token Life HQ presents on every request.

@@ -1,0 +1,33 @@
+name = "cornerstone-hevy-push"
+main = "src/index.ts"
+compatibility_date = "2026-05-26"
+account_id = "YOUR_CLOUDFLARE_ACCOUNT_ID"
+
+# No cron — outbound, on-demand only.
+# No KV — idempotency state lives in `life_ops.action_log` (single source of truth across all
+# action workers).
+
+[vars]
+GCP_PROJECT       = "your-gcp-project"
+BQ_DATASET        = "life_ops"
+SUBJECT_ID        = "1"
+TIMEZONE          = "America/New_York"
+HEVY_API_BASE     = "https://api.hevyapp.com"
+# 1.1 (2026-07-26, passback P4): honours caller title/notes, first-class `intent`, `name` accepted as
+#     an alias for `gameplan_name`, GET /contract. Bumped so action_log rows are attributable pre/post.
+# 1.2 (2026-07-26 PM): WEIGHT SAFETY. `weight_lb` accepted as an alias for `target_weight_lb` — the
+#     7/28+7/30 deloads were pushed with `weight_lb`, which was silently ignored, so every set fell
+#     through to the progressive-overload default and landed a full-weight squat in a deload. Also:
+#     `intent:'deload'` now suppresses that default entirely, so an unweighted deload exercise comes
+#     through blank rather than pre-filled with the heaviest recent load.
+WORKER_VERSION    = "cornerstone-hevy-push@1.2"
+# Numeric Hevy folder id for "Life HQ" routines. Set to "" to use Hevy's default "My Routines" folder.
+# Bootstrapped 2026-05-26 via `POST /ensure-folder`.
+HEVY_FOLDER_ID = "2936553"
+# Allowed gates (validation guard rail).
+ALLOWED_GATES     = "GREEN,YELLOW,AMBER,RED"
+
+# secrets (set via `wrangler secret put`):
+#   HEVY_API_KEY      Hevy Pro developer key from https://hevy.com/settings?developer
+#   GCP_SA_KEY        cornerstone-hevy-push SA JSON (BQ insert+select on action_log only)
+#   ADMIN_TOKEN       shared bearer for /push-routine and /ensure-folder

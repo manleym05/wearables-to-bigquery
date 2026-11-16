@@ -1,0 +1,27 @@
+name = "cornerstone-calendar"
+main = "src/index.ts"
+compatibility_date = "2026-05-26"
+account_id = "YOUR_CLOUDFLARE_ACCOUNT_ID"
+
+# Google Calendar WRITE facade — the ONLY Cornerstone worker permitted to mutate a calendar, and
+# only the dedicated "Life HQ – Daily Plan" calendar (hard scope-lock by CALENDAR_ID). The
+# life-hq-brain Worker's `calendar_write` tool calls this via a Service Binding; the brain never
+# holds Google creds itself. Mirrors cornerstone-bq-query: SA held server-side, SA→JWT→token via
+# Web Crypto, bearer-token-gated HTTPS, JSON out. No cron — on-demand only.
+
+[vars]
+GCP_PROJECT = "your-gcp-project"
+TIMEZONE    = "America/New_York"
+SUBJECT_ID  = "1"
+# The dedicated "Life HQ – Daily Plan" calendar — the ONLY calendar this worker will ever write.
+CALENDAR_ID = "9fc32765370a13009eb02dee0598d2b7dbf96cc04fddb492467daa00c00404de@group.calendar.google.com"
+
+# secrets (set via `wrangler secret put`):
+#   GCP_SA_KEY    SA JSON. Reuse the cornerstone-bq-reader SA key OR mint a dedicated
+#                 cornerstone-calendar-writer SA. REQUIRES (one-time, Google side):
+#                   1. Google Calendar API enabled on the project
+#                      (gcloud services enable calendar-json.googleapis.com --project your-gcp-project)
+#                   2. the dedicated calendar Shared with the SA's client_email, permission
+#                      "Make changes to events"  (calendar access comes from the SHARE, not GCP IAM —
+#                      no domain-wide delegation needed). The JWT requests scope calendar.events.
+#   ADMIN_TOKEN   shared bearer for /write + /list (the brain stores it as CALENDAR_TOKEN).

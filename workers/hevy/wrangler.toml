@@ -1,0 +1,23 @@
+name = "cornerstone-hevy"
+main = "src/index.ts"
+compatibility_date = "2026-05-21"
+account_id = "YOUR_CLOUDFLARE_ACCOUNT_ID"
+
+[triggers]
+# Per arch doc §3: Hevy has no webhooks; poll every 15 min during waking hours.
+# Workers cron doesn't support hour filters cleanly; 15-min flat is simplest and cheap.
+crons = ["*/15 * * * *"]
+
+[[kv_namespaces]]
+binding = "HEVY_STATE"
+id = "YOUR_KV_NAMESPACE_ID"
+
+[vars]
+GCP_PROJECT = "your-gcp-project"
+BQ_DATASET  = "life_ops"
+SUBJECT_ID  = "1"
+TIMEZONE    = "America/New_York"
+# secrets (set via `wrangler secret put`):
+#   HEVY_API_KEY
+#   GCP_SA_KEY  (cornerstone-hevy-worker SA JSON)
+#   ADMIN_TOKEN
